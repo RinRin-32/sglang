@@ -28,6 +28,7 @@ import threading
 import time
 from http import HTTPStatus
 from typing import AsyncIterator, Dict, List, Optional, Union
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 # Fix a bug of Python threading
 setattr(threading, "_register_atexit", lambda *args, **kwargs: None)
@@ -97,13 +98,18 @@ logger = logging.getLogger(__name__)
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 # Fast API
-app = FastAPI()
+app = FastAPI(
+    lifespace=None,
+    default_response_class=ORJSONResponse,
+    workers=8,
+)
 app.add_middleware(
+    #HTTPSRedirectMiddleware,
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["POST", "PUT"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 tokenizer_manager: TokenizerManager = None
@@ -557,7 +563,7 @@ def launch_server(
             host=server_args.host,
             port=server_args.port,
             log_level=server_args.log_level_http or server_args.log_level,
-            timeout_keep_alive=5,
+            timeout_keep_alive=30,
             loop="uvloop",
         )
     finally:
@@ -704,6 +710,7 @@ class Engine:
         sampling_params: Optional[Union[List[Dict], Dict]] = None,
         # The token ids for text; one can either specify text or input_ids.
         input_ids: Optional[Union[List[List[int]], List[int]]] = None,
+        input_embeds: Optional[Union[List[List[List[float]]], List[List[float]]]] = None,
         return_logprob: Optional[Union[List[bool], bool]] = False,
         logprob_start_len: Optional[Union[List[int], int]] = None,
         top_logprobs_num: Optional[Union[List[int], int]] = None,
@@ -713,6 +720,7 @@ class Engine:
         obj = GenerateReqInput(
             text=prompt,
             input_ids=input_ids,
+            input_embeds=input_embeds,
             sampling_params=sampling_params,
             return_logprob=return_logprob,
             logprob_start_len=logprob_start_len,
@@ -755,6 +763,7 @@ class Engine:
         sampling_params: Optional[Dict] = None,
         # The token ids for text; one can either specify text or input_ids.
         input_ids: Optional[Union[List[List[int]], List[int]]] = None,
+        input_embeds: Optional[Union[List[List[List[float]]], List[List[float]]]] = None,
         return_logprob: Optional[Union[List[bool], bool]] = False,
         logprob_start_len: Optional[Union[List[int], int]] = None,
         top_logprobs_num: Optional[Union[List[int], int]] = None,
@@ -764,6 +773,7 @@ class Engine:
         obj = GenerateReqInput(
             text=prompt,
             input_ids=input_ids,
+            input_embeds=input_embeds,
             sampling_params=sampling_params,
             return_logprob=return_logprob,
             logprob_start_len=logprob_start_len,

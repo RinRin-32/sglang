@@ -1,0 +1,10 @@
+[
+  {
+    "config": [],
+    "average_inference_time": 3.386980662345886,
+    "system_memory_used": 28041.08203125,
+    "system_memory_total": 171070.140625,
+    "gpu_memory_allocated": 0.0,
+    "gpu_memory_reserved": 0.0
+  }
+]
