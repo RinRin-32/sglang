@@ -28,6 +28,7 @@ import threading
 import time
 from http import HTTPStatus
 from typing import AsyncIterator, Dict, List, Optional, Tuple, Union
+from starlette.types import ASGIApp, Receive, Send, Message, Scope
 
 import torch
 
@@ -100,18 +101,60 @@ logger = logging.getLogger(__name__)
 
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-# Fast API
+class LogProcessingTime:
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+    
+    async def __call__(self, scope: Scope, receive: Receive, send: Send):
+        start_time = time.time()
+
+        async def send_wrapper(message: Message):
+            if message["type"] == "http.response.body":
+                process_time = time.time() - start_time
+                # Log the process_time here as needed
+            await send(message)
+        
+        await self.app(scope, receive, send_wrapper)
+
+class CustomCORSMiddleware:
+
+    def __init__(self, app: ASGIApp, allow_origins: list, allow_methods: list, allow_headers: list) -> None:
+        self.app = app
+        self.allow_origins = allow_origins
+        self.allow_methods = allow_methods
+        self.allow_headers = allow_headers
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send):
+        async def send_wrapper(message: Message):
+            if message["type"] == "http.response.start":
+                headers = dict(message.get("headers", []))
+                headers[b"access-control-allow-origin"] = b",".join([origin.encode() for origin in self.allow_origins])
+                headers[b"access-control-allow-methods"] = b",".join([method.encode() for method in self.allow_methods])
+                headers[b"access-control-allow-headers"] = b",".join([header.encode() for header in self.allow_headers])
+                message["headers"] = [(key, value) for key, value in headers.items()]
+            await send(message)
+
+        await self.app(scope, receive, send_wrapper)
+
+# FastAPI Application
 app = FastAPI()
+
+# Add custom middlewares
+app.add_middleware(LogProcessingTime)
 app.add_middleware(
-    CORSMiddleware,
+    CustomCORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-tokenizer_manager: TokenizerManager = None
-scheduler_info: Dict = None
+async def log_request_time(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+    return response
 
 
 ##### Native API endpoints #####
@@ -286,6 +329,7 @@ async def close_session(obj: CloseSessionReqInput, request: Request):
 @time_func_latency
 async def generate_request(obj: GenerateReqInput, request: Request):
     """Handle a generate request."""
+    start_time = time.time()
     if obj.stream:
 
         async def stream_results() -> AsyncIterator[bytes]:
@@ -309,6 +353,8 @@ async def generate_request(obj: GenerateReqInput, request: Request):
     else:
         try:
             ret = await tokenizer_manager.generate_request(obj, request).__anext__()
+            process_time = time.time() - start_time
+            logging.info(f"Process time: {process_time} seconds")
             return ret
         except ValueError as e:
             logger.error(f"Error: {e}")
