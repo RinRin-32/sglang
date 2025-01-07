@@ -1,0 +1,113 @@
+syntax = "proto3";
+
+package sglang;
+
+// Import statements for necessary types
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+
+// Define the messages based on io_struct.py
+message SessionParams {
+    string id = 1;
+    string rid = 2;
+    int32 offset = 3;
+    bool replace = 4;
+}
+
+message GenerateReqInput {
+    oneof input {
+        string text = 1;
+        int32 input_ids = 2;
+        string image_data = 3;
+        bytes input_embeds_file = 4;
+    }
+    map<string, string> sampling_params = 8;
+    string rid = 9;
+    bool return_logprob = 10;
+    int32 logprob_start_len = 11;
+    int32 top_logprobs_num = 12;
+    bool return_text_in_logprobs = 13;
+}
+
+message EmbeddingReqInput {
+    oneof input {
+        string text = 1;
+    }
+}
+
+message UpdateWeightFromDiskReqInput {
+    string path = 1;
+}
+
+message InitWeightsUpdateGroupReqInput {
+    string master_address = 1;
+    int32 master_port = 2;
+    int32 rank_offset = 3;
+    int32 world_size = 4;
+    string group_name = 5;
+    string backend = 6;
+}
+
+message UpdateWeightsFromDistributedReqInput {
+    string name = 1;
+    string dtype = 2;
+    repeated int32 shape = 3;
+}
+
+message UpdateWeightsFromTensorReqInput {
+    string serialized_named_tensors = 1;
+}
+
+message GetWeightsByNameReqInput {
+    string name = 1;
+    int32 truncate_size = 2;
+}
+
+message CloseSessionReqInput {
+    string session_id = 1;
+}
+
+message OpenSessionReqInput {
+    string session_id = 1;
+}
+
+message GenerateResponse {
+    string result = 1;
+}
+
+message EmbeddingResponse {
+    string result = 1;
+}
+
+message UpdateWeightsResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message SessionResponse {
+    string session_id = 1;
+}
+
+message ErrorResponse {
+    string message = 1;
+}
+
+// Define the services based on server.py
+service SGLangService {
+    rpc Health(google.protobuf.Empty) returns (google.protobuf.Empty);
+    rpc HealthGenerate(google.protobuf.Empty) returns (google.protobuf.Empty);
+    rpc GetModelInfo(google.protobuf.Empty) returns (google.protobuf.Struct);
+    rpc GetServerInfo(google.protobuf.Empty) returns (google.protobuf.Struct);
+    rpc FlushCache(google.protobuf.Empty) returns (google.protobuf.Empty);
+    rpc StartProfile(google.protobuf.Empty) returns (google.protobuf.Empty);
+    rpc StopProfile(google.protobuf.Empty) returns (google.protobuf.Empty);
+    rpc UpdateWeightsFromDisk(UpdateWeightFromDiskReqInput) returns (UpdateWeightsResponse);
+    rpc InitWeightsUpdateGroup(InitWeightsUpdateGroupReqInput) returns (UpdateWeightsResponse);
+    rpc UpdateWeightsFromDistributed(UpdateWeightsFromDistributedReqInput) returns (UpdateWeightsResponse);
+    rpc GetWeightsByName(GetWeightsByNameReqInput) returns (google.protobuf.Struct);
+    rpc OpenSession(OpenSessionReqInput) returns (SessionResponse);
+    rpc CloseSession(CloseSessionReqInput) returns (google.protobuf.Empty);
+    rpc Generate(GenerateReqInput) returns (GenerateResponse);
+    rpc Encode(EmbeddingReqInput) returns (EmbeddingResponse);
+    rpc Classify(EmbeddingReqInput) returns (EmbeddingResponse);
+}

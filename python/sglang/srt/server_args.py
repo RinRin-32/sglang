@@ -156,6 +156,9 @@ class ServerArgs:
     num_continuous_decode_steps: int = 1
     delete_ckpt_after_loading: bool = False
 
+    # Add gRPC port
+    grpc_port: Optional[int] = None
+
     def __post_init__(self):
         # Set missing default values
         if self.tokenizer_path is None:
@@ -843,6 +846,12 @@ class ServerArgs:
             "--delete-ckpt-after-loading",
             action="store_true",
             help="Delete the model checkpoint after loading the model.",
+        )
+        parser.add_argument(
+            "--grpc-port",
+            type=int,
+            default=None,
+            help="The port of the gRPC server. No default value."
         )
 
     @classmethod
