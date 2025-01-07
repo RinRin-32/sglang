@@ -2,6 +2,8 @@ import grpc
 import json
 import time
 from typing import List
+from io import BytesIO
+import numpy as np
 from sglang.srt.proto import completion_pb2, completion_pb2_grpc
 
 
@@ -25,15 +27,19 @@ def load_input_embeddings(file_path: str) -> List[List[List[float]]]:
     return embeddings_list
 
 
-def create_completion_request(embeds: List[List[List[float]]], max_tokens: int = 100) -> completion_pb2.CompletionRequest:
+def create_completion_request_with_file(
+    embeddings: List[List[List[float]]], max_tokens: int = 100
+) -> completion_pb2.CompletionRequest:
     """
-    Create a gRPC CompletionRequest with input embeddings.
+    Create a gRPC CompletionRequest with input embeddings sent as a file.
     """
-    # Convert the embeds to the correct message format
-    embeds_3d = [completion_pb2.EmbedsList(embeds=sublist) for sublist in embeds]
+    # Serialize the embeddings into a binary file-like object
+    file_stream = BytesIO()
+    np.save(file_stream, np.array(embeddings, dtype=object), allow_pickle=True)
+    file_stream.seek(0)  # Reset the stream position
 
     return completion_pb2.CompletionRequest(
-        input_embeds=completion_pb2.InputEmbeds(embeds_3d=embeds_3d),  # Send the nested list of floats as ListofEmbeds
+        embedding_file=completion_pb2.EmbeddingFile(file_content=file_stream.read()),
         max_tokens=max_tokens,
         temperature=0.7,
         top_p=0.9,
@@ -50,7 +56,7 @@ def create_completion_request(embeds: List[List[List[float]]], max_tokens: int =
 def main():
     # Server address
     server_address = "localhost:60001"
-    embed_file_path = "/home/jupyter/LLMASR/test_embeds.txt" #path to preprocessed embed file
+    embed_file_path = "/home/jupyter/LLMASR/test_embeds.txt"  # Path to preprocessed embed file
 
     # Load embeddings from the file
     embeddings_list = load_input_embeddings(embed_file_path)
@@ -64,7 +70,7 @@ def main():
             try:
                 print(f"Sending embeddings from line {idx + 1}")
 
-                request = create_completion_request(embeds=embeds)
+                request = create_completion_request_with_file(embeddings=embeds)
                 # Start the timer
                 start_time = time.time()
                 response_iterator = stub.Complete(request)

@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10\x63ompletion.proto\x12\x11sglang.completion\"\xb2\x02\n\x11\x43ompletionRequest\x12\r\n\x05model\x18\x01 \x01(\t\x12\x10\n\x06prompt\x18\x02 \x01(\tH\x00\x12\x36\n\x0cinput_embeds\x18\r \x01(\x0b\x32\x1e.sglang.completion.InputEmbedsH\x00\x12\x12\n\nmax_tokens\x18\x03 \x01(\x05\x12\x13\n\x0btemperature\x18\x04 \x01(\x02\x12\r\n\x05top_p\x18\x05 \x01(\x02\x12\r\n\x05top_k\x18\x06 \x01(\x05\x12\r\n\x05min_p\x18\x07 \x01(\x02\x12\x19\n\x11\x66requency_penalty\x18\x08 \x01(\x02\x12\x18\n\x10presence_penalty\x18\t \x01(\x02\x12\x0e\n\x06stream\x18\n \x01(\x08\x12\x0c\n\x04stop\x18\x0b \x03(\t\x12\x12\n\nignore_eos\x18\x0c \x01(\x08\x42\x07\n\x05input\"R\n\x0bInputEmbeds\x12\x30\n\tembeds_3d\x18\x01 \x03(\x0b\x32\x1d.sglang.completion.EmbedsList\x12\x11\n\tembeds_2d\x18\x02 \x03(\x02\"\x1c\n\nEmbedsList\x12\x0e\n\x06\x65mbeds\x18\x01 \x03(\x02\"]\n\x12\x43ompletionResponse\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x10\n\x08\x66inished\x18\x02 \x01(\x08\x12\'\n\x05usage\x18\x03 \x01(\x0b\x32\x18.sglang.completion.Usage\"O\n\x05Usage\x12\x15\n\rprompt_tokens\x18\x01 \x01(\x05\x12\x19\n\x11\x63ompletion_tokens\x18\x02 \x01(\x05\x12\x14\n\x0ctotal_tokens\x18\x03 \x01(\x05\x32p\n\x11\x43ompletionService\x12[\n\x08\x43omplete\x12$.sglang.completion.CompletionRequest\x1a%.sglang.completion.CompletionResponse\"\x00\x30\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10\x63ompletion.proto\x12\x11sglang.completion\"\xee\x02\n\x11\x43ompletionRequest\x12\r\n\x05model\x18\x01 \x01(\t\x12\x10\n\x06prompt\x18\x02 \x01(\tH\x00\x12\x36\n\x0cinput_embeds\x18\r \x01(\x0b\x32\x1e.sglang.completion.InputEmbedsH\x00\x12:\n\x0e\x65mbedding_file\x18\x0e \x01(\x0b\x32 .sglang.completion.EmbeddingFileH\x00\x12\x12\n\nmax_tokens\x18\x03 \x01(\x05\x12\x13\n\x0btemperature\x18\x04 \x01(\x02\x12\r\n\x05top_p\x18\x05 \x01(\x02\x12\r\n\x05top_k\x18\x06 \x01(\x05\x12\r\n\x05min_p\x18\x07 \x01(\x02\x12\x19\n\x11\x66requency_penalty\x18\x08 \x01(\x02\x12\x18\n\x10presence_penalty\x18\t \x01(\x02\x12\x0e\n\x06stream\x18\n \x01(\x08\x12\x0c\n\x04stop\x18\x0b \x03(\t\x12\x12\n\nignore_eos\x18\x0c \x01(\x08\x42\x07\n\x05input\"R\n\x0bInputEmbeds\x12\x30\n\tembeds_3d\x18\x01 \x03(\x0b\x32\x1d.sglang.completion.EmbedsList\x12\x11\n\tembeds_2d\x18\x02 \x03(\x02\"\x1c\n\nEmbedsList\x12\x0e\n\x06\x65mbeds\x18\x01 \x03(\x02\"%\n\rEmbeddingFile\x12\x14\n\x0c\x66ile_content\x18\x01 \x01(\x0c\"]\n\x12\x43ompletionResponse\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x10\n\x08\x66inished\x18\x02 \x01(\x08\x12\'\n\x05usage\x18\x03 \x01(\x0b\x32\x18.sglang.completion.Usage\"O\n\x05Usage\x12\x15\n\rprompt_tokens\x18\x01 \x01(\x05\x12\x19\n\x11\x63ompletion_tokens\x18\x02 \x01(\x05\x12\x14\n\x0ctotal_tokens\x18\x03 \x01(\x05\x32p\n\x11\x43ompletionService\x12[\n\x08\x43omplete\x12$.sglang.completion.CompletionRequest\x1a%.sglang.completion.CompletionResponse\"\x00\x30\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -32,15 +32,17 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'completion_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_COMPLETIONREQUEST']._serialized_start=40
-  _globals['_COMPLETIONREQUEST']._serialized_end=346
-  _globals['_INPUTEMBEDS']._serialized_start=348
-  _globals['_INPUTEMBEDS']._serialized_end=430
-  _globals['_EMBEDSLIST']._serialized_start=432
-  _globals['_EMBEDSLIST']._serialized_end=460
-  _globals['_COMPLETIONRESPONSE']._serialized_start=462
-  _globals['_COMPLETIONRESPONSE']._serialized_end=555
-  _globals['_USAGE']._serialized_start=557
-  _globals['_USAGE']._serialized_end=636
-  _globals['_COMPLETIONSERVICE']._serialized_start=638
-  _globals['_COMPLETIONSERVICE']._serialized_end=750
+  _globals['_COMPLETIONREQUEST']._serialized_end=406
+  _globals['_INPUTEMBEDS']._serialized_start=408
+  _globals['_INPUTEMBEDS']._serialized_end=490
+  _globals['_EMBEDSLIST']._serialized_start=492
+  _globals['_EMBEDSLIST']._serialized_end=520
+  _globals['_EMBEDDINGFILE']._serialized_start=522
+  _globals['_EMBEDDINGFILE']._serialized_end=559
+  _globals['_COMPLETIONRESPONSE']._serialized_start=561
+  _globals['_COMPLETIONRESPONSE']._serialized_end=654
+  _globals['_USAGE']._serialized_start=656
+  _globals['_USAGE']._serialized_end=735
+  _globals['_COMPLETIONSERVICE']._serialized_start=737
+  _globals['_COMPLETIONSERVICE']._serialized_end=849
 # @@protoc_insertion_point(module_scope)
